@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cool Football Players!</title>
+    <script src="https://cdn.jsdelivr.net/npm/axios@1.6.7/dist/axios.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f9f9f9;
+            color: #333;
+            display: flex;
+            flex-direction: row;
+            align-items: flex-start;
+        }
+
+        header {
+            background-color: #4CAF50;
+            color: white;
+            padding: 1rem;
+            text-align: center;
+            width: 100%;
+            position: fixed;
+            top: 0;
+            z-index: 1000;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 2rem;
+        }
+
+        #form-container {
+            width: 300px;
+            padding: 1rem;
+            background: #fff;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 4rem;
+            margin: 2rem;
+            flex-shrink: 0;
+        }
+
+        input {
+            margin: 0.5rem 0;
+            padding: 0.5rem;
+            width: calc(100% - 1rem);
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            display: block;
+        }
+
+        button {
+            margin: 0.5rem 0;
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 5px;
+            background-color: #4CAF50;
+            color: white;
+            cursor: pointer;
+            width: 100%;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        #display {
+            margin: 2rem;
+            padding: 1rem;
+            background: white;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            flex-grow: 1;
+            overflow-y: auto;
+            max-height: calc(100vh - 4rem);
+        }
+
+        .player-card {
+            border-bottom: 1px solid #ddd;
+            padding: 1rem 0;
+        }
+
+        .player-card:last-child {
+            border-bottom: none;
+        }
+
+        .player-card p {
+            border: 1px solid black;
+            padding: 0.5rem;
+            background: #f1f1f1;
+        }
+
+        .player-card button {
+            width: auto;
+            margin: 0.5rem 0;
+        }
+
+        .player-card button:first-of-type {
+            background-color: #f44336;
+            color: white;
+        }
+
+        .player-card button:first-of-type:hover {
+            background-color: #d32f2f;
+        }
+
+        img {
+            vertical-align: middle;
+            width: 20px;
+            height: 20px;
+            margin-right: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <h1>
+            <img src="188864.png" alt="Football Icon"> Cool
+            Football Players!
+        </h1>
+    </header>
+
+    <div id="form-container">
+        Name: <input id="Pname">
+        Current club: <input id="current_club">
+        League: <input id="league">
+        Origin: <input id="origin_country">
+        <button onclick="createPlayer()">Add</button>
+    </div>
+
+    <div id="display"></div>
+
+    <script>
+        const SERVER = 'http://localhost:3000/players';
+
+        // Read
+        const read = () => axios(SERVER).then(res => {
+            display.innerHTML = res.data.map(player => `
+                <div class="player-card">                   
+                    <p>
+                        <strong>Player:</strong> ${player.name}<br>
+                        <strong>Current Club:</strong> ${player.current_club}<br>
+                        <strong>League:</strong> ${player.league}<br>
+                        <strong>Origin:</strong> ${player.origin_country}<br>
+                    </p>
+                    <button onclick="del('${player.id}')">Delete</button>
+                    <button onclick="updatePlayer('${player.id}')">Update</button>
+                    <hr>
+                    
+                </div>
+            `).join("");
+        }).catch(err => {
+            console.error("Error fetching data:", err);
+            display.innerHTML = "<p>Failed to load player data.</p>";
+        });
+
+        // Delete
+        const del = (id) => {
+            axios.delete(SERVER + `/${id}`).then(() => read());
+        };
+
+        // Update
+        const updatePlayer = (id) => {
+            if (Pname.value && current_club.value && league.value && origin_country.value) {
+                axios.put(SERVER + `/${id}`, {
+                    name: Pname.value,
+                    current_club: current_club.value,
+                    league: league.value,
+                    origin_country: origin_country.value
+                }).then(() => read());
+            }
+        };
+
+        // Create
+        const createPlayer = () => {
+            if (Pname.value && current_club.value && league.value && origin_country.value) {
+                axios.post(SERVER, {
+                    name: Pname.value,
+                    current_club: current_club.value,
+                    league: league.value,
+                    origin_country: origin_country.value
+                }).then(() => read());
+            }
+        };
+
+        // Initialize
+        read();
+    </script>
+</body>
+
+</html>
